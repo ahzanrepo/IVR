@@ -1,0 +1,119 @@
+<?php
+ /**
+ * @author achintha
+ * @copyright 2016
+ */
+//ExceptionThrower::start();
+// try
+ //{
+    
+	include_once("WriteLog.php");
+	require_once("config.php");
+	require_once("PHPVoiceLibrary/class.DialNumber.php");
+	//require_once("PHPVoiceLibrary/class.DialExtension.php");
+	require_once("PHPVoiceLibrary/class.PlayFile.php");
+	require_once("PHPVoiceLibrary/class.PlayFileAndGetDigits.php");
+	require_once("PHPVoiceLibrary/class.Ards.php");
+	require_once("PHPVoiceLibrary/class.VoiceMail.php");
+	require_once("PHPVoiceLibrary/class.Say.php");
+        require_once("PHPVoiceLibrary/class.Execute.php");
+	//require_once("PHPVoiceLibrary/class.RecordVoiceMessage.php");
+//	require_once("class.HolidayCalander.php");
+
+	$wrtLg = new WriteLog();
+//	$objProcesIvr = new ProcessIVR();
+//	$objHolidayCalander = new IsHolyday();
+
+	$calldata = json_decode($HTTP_RAW_POST_DATA,true);
+//    $calldata = json_decode('{"session":"9618e180-6332-46df-9877-bcbb9c59fd72","direction":"inbound","ani":"3726027093","dnis":"99051000278670","name":"achinthau","result":"none","dev_params":{"result":"6"}}',true);
+
+$params = $calldata["dev_params"];
+
+	$wrtLg->WriteFile("Process.php  >>>>>>>>>>>321321>>>>>>>>>>>>> - ".$HTTP_RAW_POST_DATA." - ".date("Y-m-d H:i:s"));
+	
+if($calldata['result'] == "none")
+{
+	$wrtLg->WriteFile("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
+//	$result= $calldata["dev_params"]["LastDigit"];
+	$result = SetArds($nextFile,"http://localhost/IVR/end.json","FirstDigit",$params["FirstMenu"].",60","SUPPORT","SUPPORT","duohold",$priority,"103","1",$eventlog);
+
+	$wrtLg->WriteFile("ProcessMenu.php \t sdadadasdasdadasfaf \t - ".$result);
+	print $result;
+}
+else
+{
+        $exten= $calldata['result'];
+	$result = DirectDial($nextFile,"",$result,"public",$params,"Dial_ext","XML",$ani,$ani,$exten,"true");
+//	$result = DirectDial1();
+        print $result;
+}
+
+function DirectDial1()
+{
+return "111";
+}
+
+function DirectDial($nexturl,$app,$result,$context,$params,$display,$dialplan,$callername,$callernumber,$number,$eventLog)
+        {
+            try
+             {
+                $dialNum = new DialNumber();
+
+                $dialNum->SetNextUrl($nexturl);
+                $dialNum->SetApp("");
+                $dialNum->SetResult($result);
+                $dialNum->SetContext($context);
+                $dialNum->SetParams($params);
+                $dialNum->SetDisplay($display);
+                $dialNum->SetDialplan($dialplan);
+                $dialNum->SetCallerName($callername);
+                $dialNum->SetCallerNumber($callernumber);
+                $dialNum->SetNumber($number);
+                $dialNum->SetEventlog($eventLog);
+
+                $result = $dialNum->GetResult();
+                return $result;
+
+             }
+            catch(exception $ex)
+             {
+                return $ex;
+             }
+        }
+
+function SetArds($nexturl,$posturl,$result,$skill,$skillDisplay,$displayNode,$profile,$priority,$company,$tenant,$eventlog)
+        {
+//$wrtLg->WriteFile("ProcessIVR>>>>SetArds>>>>>".$nexturl."--".$posturl."--".$skill.">>case 0 >>>>>>>>> -".$profile."  - ".date("Y-m-d H:i:s"));
+            try
+             {
+                $ards = new Ards();
+
+                $ards->SetNextUrl($nexturl);
+                $ards->SetPostUrl($posturl);
+                $ards->SetResult($result);
+                $ards->SetSkill($skill);
+                $ards->SetSkillDisplay($skillDisplay);
+                $ards->SetDisplay($displayNode);
+                $ards->SetProfile($profile);
+                $ards->SetPriority($priority);
+                $ards->SetCompany($company);
+                $ards->SetTenant($tenant);
+                $ards->SetEventLog($eventlog);
+
+                $result = $ards->GetResult();
+
+        //        $wrtLg->WriteFile("ProcessIVR>>>>SetArds>>>>>".$result."-- - ".date("Y-m-d H:i:s"));
+                $result = $ards->GetResult();
+                return $result;
+
+             }
+            catch(exception $ex)
+             {
+                return $ex;
+             }
+        }
+
+
+
+//}
+?>
